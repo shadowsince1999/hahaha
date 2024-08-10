@@ -109,37 +109,37 @@ resource "aws_instance" "web" {
   }
 }
 
-# Create DB Subnet Group
-resource "aws_db_subnet_group" "main" {
-  name        = "main-db-subnet-group"
-  subnet_ids  = [aws_subnet.main_a.id, aws_subnet.main_b.id]
-  tags = {
-    Name = "main-db-subnet-group"
-  }
-}
+# # Create DB Subnet Group
+# resource "aws_db_subnet_group" "main" {
+#   name        = "main-db-subnet-group"
+#   subnet_ids  = [aws_subnet.main_a.id, aws_subnet.main_b.id]
+#   tags = {
+#     Name = "main-db-subnet-group"
+#   }
+# }
 
-# Create RDS Instance
-resource "aws_db_instance" "main" {
-  identifier = "main-rds-instance"
-  engine     = "mysql"
-  instance_class = "db.t3.micro"
-  allocated_storage = 20
-  storage_type = "gp2"
-  username = "admin"
-  password = "shadow@1122"  # Ensure this is secure or use a secrets manager
-  db_name   = "main_db"
-  vpc_security_group_ids = [aws_security_group.sg.id]
-  db_subnet_group_name = aws_db_subnet_group.main.name
-  skip_final_snapshot = true
-  tags = {
-    Name = "main-rds-instance"
-  }
-}
+# # Create RDS Instance
+# resource "aws_db_instance" "main" {
+#   identifier = "main-rds-instance"
+#   engine     = "mysql"
+#   instance_class = "db.t3.micro"
+#   allocated_storage = 20
+#   storage_type = "gp2"
+#   username = "admin"
+#   password = "shadow@1122"  # Ensure this is secure or use a secrets manager
+#   db_name   = "main_db"
+#   vpc_security_group_ids = [aws_security_group.sg.id]
+#   db_subnet_group_name = aws_db_subnet_group.main.name
+#   skip_final_snapshot = true
+#   tags = {
+#     Name = "main-rds-instance"
+#   }
+# }
 
-# Create S3 Bucket
-resource "aws_s3_bucket" "main" {
-  bucket = "my-unique-bucket-name-123456"  # Ensure this bucket name is unique across AWS
-  tags = {
-    Name = "main-s3-bucket"
-  }
-}
+# # Create S3 Bucket
+# resource "aws_s3_bucket" "main" {
+#   bucket = "my-unique-bucket-name-123456"  # Ensure this bucket name is unique across AWS
+#   tags = {
+#     Name = "main-s3-bucket"
+#   }
+# }
