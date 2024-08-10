@@ -139,7 +139,6 @@ resource "aws_db_instance" "main" {
 # Create S3 Bucket
 resource "aws_s3_bucket" "main" {
   bucket = "my-unique-bucket-name-123456"  # Ensure this bucket name is unique across AWS
-  region = "us-east-1"  # Match the provider region
   tags = {
     Name = "main-s3-bucket"
   }
