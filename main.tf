@@ -1,5 +1,3 @@
-# main.tf
-
 provider "aws" {
   region = "us-east-1"
 }
@@ -14,14 +12,24 @@ resource "aws_vpc" "main" {
   }
 }
 
-# Create Subnet
-resource "aws_subnet" "main" {
+# Create Subnets
+resource "aws_subnet" "main_a" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.1.0/24"
   availability_zone       = "us-east-1a"
   map_public_ip_on_launch = true
   tags = {
-    Name = "main-subnet"
+    Name = "main-subnet-a"
+  }
+}
+
+resource "aws_subnet" "main_b" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "us-east-1b"
+  map_public_ip_on_launch = true
+  tags = {
+    Name = "main-subnet-b"
   }
 }
 
@@ -45,9 +53,14 @@ resource "aws_route_table" "main" {
   }
 }
 
-# Associate Route Table with Subnet
-resource "aws_route_table_association" "main" {
-  subnet_id      = aws_subnet.main.id
+# Associate Route Table with Subnets
+resource "aws_route_table_association" "main_a" {
+  subnet_id      = aws_subnet.main_a.id
+  route_table_id = aws_route_table.main.id
+}
+
+resource "aws_route_table_association" "main_b" {
+  subnet_id      = aws_subnet.main_b.id
   route_table_id = aws_route_table.main.id
 }
 
@@ -78,8 +91,8 @@ resource "aws_security_group" "sg" {
 resource "aws_instance" "web" {
   ami           = "ami-04a81a99f5ec58529" # Replace with an appropriate AMI ID
   instance_type = "t2.micro"
-  subnet_id     = aws_subnet.main.id
-  security_groups = ["${aws_security_group.sg.name}"]
+  subnet_id     = aws_subnet.main_a.id
+  vpc_security_group_ids = [aws_security_group.sg.id]
 
   user_data = <<-EOF
               #!/bin/bash
@@ -96,10 +109,14 @@ resource "aws_instance" "web" {
   }
 }
 
-# # Create ECS Cluster
-# resource "aws_ecs_cluster" "main" {
-#   name = "main-cluster"
-# }
+# Create DB Subnet Group
+resource "aws_db_subnet_group" "main" {
+  name        = "main-db-subnet-group"
+  subnet_ids  = [aws_subnet.main_a.id, aws_subnet.main_b.id]
+  tags = {
+    Name = "main-db-subnet-group"
+  }
+}
 
 # Create RDS Instance
 resource "aws_db_instance" "main" {
@@ -109,7 +126,7 @@ resource "aws_db_instance" "main" {
   allocated_storage = 20
   storage_type = "gp2"
   username = "admin"
-  password = "shadow@1122"  # Make sure to use a secure password or refer to a secrets manager
+  password = "shadow@1122"  # Ensure this is secure or use a secrets manager
   db_name   = "main_db"
   vpc_security_group_ids = [aws_security_group.sg.id]
   db_subnet_group_name = aws_db_subnet_group.main.name
@@ -119,18 +136,10 @@ resource "aws_db_instance" "main" {
   }
 }
 
-# Create DB Subnet Group
-resource "aws_db_subnet_group" "main" {
-  name        = "main-db-subnet-group"
-  subnet_ids  = [aws_subnet.main.id]
-  tags = {
-    Name = "main-db-subnet-group"
-  }
-}
-
 # Create S3 Bucket
 resource "aws_s3_bucket" "main" {
   bucket = "my-unique-bucket-name-123456"  # Ensure this bucket name is unique across AWS
+  region = "us-east-1"  # Match the provider region
   tags = {
     Name = "main-s3-bucket"
   }
