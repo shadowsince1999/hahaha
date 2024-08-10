@@ -87,6 +87,8 @@ resource "aws_instance" "web" {
               apt install -y docker
               service docker start
               usermod -a -G docker ec2-user
+              docker pull public.ecr.aws/q4r9a4c1/hahaha/shadow:latest
+              docker run -d -p 3000:3000 public.ecr.aws/q4r9a4c1/hahaha/shadow:latest
               EOF
 
   tags = {
