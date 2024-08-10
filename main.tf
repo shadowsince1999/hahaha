@@ -96,10 +96,12 @@ resource "aws_instance" "web" {
 
   user_data = <<-EOF
               #!/bin/bash
+              set -x  # Enable script debugging
               apt update -y
-              apt install -y docker
-              service docker start
-              usermod -a -G docker ec2-user
+              apt install -y docker.io  # Use docker.io for Ubuntu
+              systemctl start docker
+              systemctl enable docker
+              usermod -aG docker ${USER}
               docker pull public.ecr.aws/q4r9a4c1/hahaha/shadow:latest
               docker run -d -p 3000:3000 public.ecr.aws/q4r9a4c1/hahaha/shadow:latest
               EOF
