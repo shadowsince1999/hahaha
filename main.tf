@@ -97,11 +97,17 @@ resource "aws_instance" "web" {
   user_data = <<-EOF
               #!/bin/bash
               set -x  # Enable script debugging
-              apt update -y
-              apt install -y docker.io
-              systemctl start docker
-              systemctl enable docker
-              usermod -aG docker $USER
+              sudo apt update
+              sudo apt install apt-transport-https ca-certificates curl software-properties-common
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+              echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+              sudo apt update
+              apt-cache policy docker-ce
+              sudo apt install docker-ce
+              sudo systemctl start docker
+              sudo usermod -aG docker ${USER}
+              su - ${USER}
+              sudo usermod -aG docker username
               docker pull public.ecr.aws/q4r9a4c1/hahaha/shadow:latest
               docker run -d -p 3000:3000 public.ecr.aws/q4r9a4c1/hahaha/shadow:latest
               EOF
