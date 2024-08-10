@@ -82,6 +82,13 @@ resource "aws_security_group" "sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   tags = {
     Name = "main-security-group"
   }
@@ -97,22 +104,38 @@ resource "aws_instance" "web" {
   user_data = <<-EOF
               #!/bin/bash
               set -x  # Enable script debugging
-              apt update
-              apt install -y apt-transport-https ca-certificates curl software-properties-common
-              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg -y
-              echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com>
-              apt-cache policy docker-ce
-              apt install -y docker-ce
-              systemctl start docker
-              sudo docker pull public.ecr.aws/q4r9a4c1/hahaha/shadow:latest
-              sudo docker run -d -p 3000:3000 public.ecr.aws/q4r9a4c1/hahaha/shadow:latest
-              EOF
 
+              # Update package index
+              apt update
+
+              # Install dependencies
+              apt install -y apt-transport-https ca-certificates curl software-properties-common gnupg
+
+              # Add Docker’s official GPG key
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+              # Set up the Docker stable repository
+              echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+              # Update package index again
+              apt update
+
+              # Install Docker Engine
+              apt install -y docker-ce
+
+              # Start Docker service
+              systemctl start docker
+
+              # Pull and run Docker image
+              sudo docker pull public.ecr.aws/q4r9a4c1/hahaha:latest
+              sudo docker run -d -p 3000:3000 public.ecr.aws/q4r9a4c1/hahaha:latest
+              EOF
 
   tags = {
     Name = "web-instance"
   }
 }
+
 
 # # Create DB Subnet Group
 # resource "aws_db_subnet_group" "main" {
