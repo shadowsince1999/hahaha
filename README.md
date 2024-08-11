@@ -24,7 +24,7 @@ app.get('/', (req, res) => res.send('KYA HAL HAI'));
 app.listen(3000, () => console.log('Example app listening on port http://localhost:3000'));
 
 ### `package.json`
-{
+`{
   "name": "nodejs-sampleapp",
   "version": "1.0.0",
   "description": "sample node app ",
@@ -45,7 +45,7 @@ app.listen(3000, () => console.log('Example app listening on port http://localho
     "url": "https://github.com/techoclouds/Nodejs-SampleApp/issues"
   },
   "homepage": "https://github.com/techoclouds/Nodejs-SampleApp#readme"
-}
+}`
 
 ###`Dockerfile`
 FROM node:18
